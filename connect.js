@@ -6,3 +6,9 @@ const connect = mysql.createConnection({
     password: '',
     database: 'data_note'
 });
+
+connect.connect(function (err) {
+    if (err) throw err
+});
+
+module.exports = connect;
