@@ -5,9 +5,9 @@ const bodyParser = require('body-parse');
 const routes = require('./routes');
 
 app.use(
-  bodyParser.urlencoded({
-    extended:true,
-  })
+    bodyParser.urlencoded({
+        extended: true,
+    })
 );
 
 app.use(bodyParser.json());
