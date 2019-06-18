@@ -3,6 +3,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const routes = require('./routes');
+const dateFormat = require('dateformat');
 
 app.use(
     bodyParser.urlencoded({
@@ -10,6 +11,12 @@ app.use(
     })
 );
 
+app.use(
+    function (req, res, next) {
+        console.log(`TIME: ${dateFormat(new Date(), "yyyy-mm-dd h:MM:ss")} HOST ${req.headers.host} PATH : ${req.path}`);
+        next();
+    }
+);
 app.use(bodyParser.json());
 
 routes(app);
