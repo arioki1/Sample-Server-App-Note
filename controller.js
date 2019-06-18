@@ -4,10 +4,10 @@ const response = require('./response');
 const connection = require('./connect');
 const dateFormat = require('dateformat');
 
+//Controler Note
 exports.home = function (req, res) {
     response.ok('Welcome to Server Sample Note App API', res);
 };
-
 exports.list_note = function (req, res) {
     connection.query(`select * from data_note`, function (error, rows, field) {
         if (error) {
@@ -18,7 +18,6 @@ exports.list_note = function (req, res) {
         }
     });
 };
-
 exports.insert_note = function (req, res) {
     let note = req.body.note;
     let id_category = req.body.id_category;
@@ -43,7 +42,6 @@ exports.insert_note = function (req, res) {
             })
     }
 };
-
 exports.update_note = function (req, res) {
     let id = req.params.id;
     let id_category = req.body.id_category;
@@ -60,13 +58,69 @@ exports.update_note = function (req, res) {
         )
     }
 };
-
-exports.delete = function (req, res) {
+exports.delete_note = function (req, res) {
 
     connection.query(`delete from data_note where id =?`, [req.params.id],
         function (error, result, fields) {
             if (error) throw error;
             (result.affectedRows == 0) ? response.ok("id not found!", res) : response.ok("Note has been deleted!", res);
+        }
+    )
+};
+
+//Controller Category
+exports.list_category = function (req, res) {
+    connection.query(`select * from category_note`, function (error, rows, field) {
+        if (error) {
+            throw error;
+            response.error(res);
+        } else {
+            response.ok(rows, res);
+        }
+    });
+};
+exports.insert_category = function (req, res) {
+    let name = req.body.name;
+
+    if (typeof name == 'undefined') {
+        response.ok("Field name cannot null or empty", res);
+    } else {
+        connection.query(`INSERT INTO category_note set name=?`, [name],
+            function (error, rows, field) {
+                if (error) {
+                    throw error;
+                    response.error(res)
+                } else {
+                    let data = {
+                        error: false,
+                        data: rows,
+                        message: 'New data has been created',
+                    };
+                    response.ok(data, res)
+                }
+            })
+    }
+};
+exports.update_category = function (req, res) {
+    let id = req.params.id;
+    let name = req.body.name;
+
+    if (typeof name == 'undefined') {
+        response.ok("Field name cannot null or empty", res);
+    } else {
+        connection.query(`UPDATE category_note SET name=? WHERE id=?`, [name, id],
+            function (error, result, field) {
+                if (error) throw error;
+                (result.affectedRows == 0) ? response.ok("Update Category didn't work", res) : response.ok("Category has been update!", res);
+            }
+        )
+    }
+};
+exports.delete_category = function (req, res) {
+    connection.query(`delete from category_note where id =?`, [req.params.id],
+        function (error, result, fields) {
+            if (error) throw error;
+            (result.affectedRows == 0) ? response.ok("id not found!", res) : response.ok("Category has been deleted!", res);
         }
     )
 };
