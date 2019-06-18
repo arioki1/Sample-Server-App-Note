@@ -5,6 +5,7 @@ module.exports = function (app) {
     //Route API Note
     app.route('/').get(controller.home);
     app.route('/note/').get(controller.list_note);
+    app.route('/note/:id').get(controller.list_note_id);
     app.route('/note').post(controller.insert_note);
     app.route('/note/:id').delete(controller.delete_note);
     app.route('/note/:id').patch(controller.update_note);
