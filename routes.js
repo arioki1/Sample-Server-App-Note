@@ -1,4 +1,4 @@
-'use stric';
+'use stric'
 
 module.exports = function (app) {
     const controller = require('./controller');
