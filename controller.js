@@ -9,10 +9,15 @@ exports.home = function (req, res) {
     response.ok('Welcome to Server Sample Note App API', res);
 };
 exports.list_note = function (req, res) {
-    connection.query(`select * from data_note`, function (error, rows, field) {
+    const sql = 'SELECT ' +
+        'data_note.id, data_note.title, data_note.note, data_note.time, data_note.id_category, category_note.name as "name_category" ' +
+        'FROM data_note ' +
+        'LEFT JOIN category_note ' +
+        'ON data_note.id_category=category_note.id';
+
+    connection.query(sql, function (error, rows, field) {
         if (error) {
             throw error;
-            response.error(res);
         } else {
             response.ok(rows, res);
         }
