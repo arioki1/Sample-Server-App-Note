@@ -24,7 +24,6 @@ exports.list_note = function (req, res) {
     });
 };
 exports.list_note_id = function (req, res) {
-    console.log("masuk")
     const sql = 'SELECT ' +
         'data_note.id, data_note.title, data_note.note, data_note.time, data_note.id_category, category_note.name as "name_category" ' +
         'FROM data_note ' +
