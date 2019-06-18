@@ -21,12 +21,13 @@ exports.list_note = function (req, res) {
 exports.insert_note = function (req, res) {
     let note = req.body.note;
     let id_category = req.body.id_category;
+    let title = req.body.title;
     let time = dateFormat(new Date(), "yyyy-mm-dd h:MM:ss");
 
-    if (typeof note == 'undefined' || typeof id_category == 'undefined') {
+    if (typeof note == 'undefined' || typeof id_category == 'undefined' || typeof title == 'undefined') {
         response.ok("Field note or id_category cannot null or empty", res);
     } else {
-        connection.query(`INSERT INTO data_note  set note=?, time=?, id_category=?`, [note, time, id_category],
+        connection.query(`INSERT INTO data_note set title=?, note=?, time=?, id_category=?;`, [title, note, time, id_category],
             function (error, rows, field) {
                 if (error) {
                     throw error
@@ -46,11 +47,12 @@ exports.update_note = function (req, res) {
     let id = req.params.id;
     let id_category = req.body.id_category;
     let note = req.body.note;
+    let title = req.body.title;
 
-    if (typeof id_category == 'undefined' || typeof note == 'undefined') {
+    if (typeof id_category == 'undefined' || typeof note == 'undefined' || typeof title == 'undefined') {
         response.ok("Field note or id_category cannot null or empty", res);
     } else {
-        connection.query(`UPDATE data_note SET note=?, id_category=? WHERE id=?;`, [note, id_category, id],
+        connection.query(`UPDATE data_note SET title=?, note=?, id_category=? WHERE id=?;`, [title, note, id_category, id],
             function (error, result, field) {
                 if (error) throw error;
                 (result.affectedRows == 0) ? response.ok("Update Note didn't work", res) : response.ok("Note has been update!", res);
