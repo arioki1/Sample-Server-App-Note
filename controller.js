@@ -23,6 +23,23 @@ exports.list_note = function (req, res) {
         }
     });
 };
+exports.list_note_id = function (req, res) {
+    console.log("masuk")
+    const sql = 'SELECT ' +
+        'data_note.id, data_note.title, data_note.note, data_note.time, data_note.id_category, category_note.name as "name_category" ' +
+        'FROM data_note ' +
+        'LEFT JOIN category_note ' +
+        'ON data_note.id_category=category_note.id ' +
+        'WHERE data_note.id = "' + req.params.id + '"';
+
+    connection.query(sql, function (error, rows, field) {
+        if (error) {
+            throw error;
+        } else {
+            response.ok(rows, res);
+        }
+    });
+};
 exports.insert_note = function (req, res) {
     let note = req.body.note;
     let id_category = req.body.id_category;
