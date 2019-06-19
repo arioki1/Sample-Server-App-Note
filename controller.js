@@ -13,7 +13,6 @@ exports.listNote = function (req, res) {
                 data_note.time, category_note.name as "name_category" 
                 FROM data_note LEFT JOIN category_note 
                 ON data_note.id_category=category_note.id`;
-
     connection.query(sql, function (error, rows, field) {
         if (error) {
             throw error;
@@ -26,13 +25,12 @@ exports.listNoteId = function (req, res) {
     const sql = `SELECT data_note.id, data_note.title, data_note.note, data_note.time, category_note.name as "name_category"
                  FROM data_note LEFT JOIN category_note 
                  ON data_note.id_category=category_note.id 
-                 WHERE data_note.id = ${req.params.id}`;
-
+                 WHERE data_note.id = '${req.query.id}'`;
     connection.query(sql, function (error, rows, field) {
         if (error) {
             throw error;
         } else {
-            response.ok(rows, res);
+            (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not exit", res);
         }
     });
 };
@@ -86,6 +84,35 @@ exports.deleteNote = function (req, res) {
             (result.affectedRows == 0) ? response.ok("id not found!", res) : response.ok("Note has been deleted!", res);
         }
     )
+};
+exports.searchNote = function (req, res) {
+    const title = req.query.search || "";
+    const sql = `SELECT data_note.id, data_note.title, data_note.note, 
+                data_note.time, category_note.name as "name_category" 
+                FROM data_note LEFT JOIN category_note 
+                ON data_note.id_category=category_note.id
+                WHERE data_note.title LIKE '%${title}%'`;
+    connection.query(sql, function (error, rows, field) {
+        if (error) {
+            throw error;
+        } else {
+            (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not exit", res);
+        }
+    });
+};
+exports.sortNote = function (req, res) {
+    const sql = `SELECT data_note.id, data_note.title, data_note.note, 
+                data_note.time, category_note.name as "name_category"
+                FROM data_note LEFT JOIN category_note 
+                ON data_note.id_category=category_note.id
+                ORDER BY data_note.title ASC`;
+    connection.query(sql, function (error, rows, field) {
+        if (error) {
+            throw error;
+        } else {
+            (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not exit", res);
+        }
+    });
 };
 
 //Controller Category
