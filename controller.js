@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 const response = require('./response');
 const connection = require('./connect');
@@ -8,12 +8,11 @@ const dateFormat = require('dateformat');
 exports.home = function (req, res) {
     response.ok('Welcome to Server Sample Note App API', res);
 };
-exports.list_note = function (req, res) {
-    const sql = 'SELECT ' +
-        'data_note.id, data_note.title, data_note.note, data_note.time, data_note.id_category, category_note.name as "name_category" ' +
-        'FROM data_note ' +
-        'LEFT JOIN category_note ' +
-        'ON data_note.id_category=category_note.id';
+exports.listNote = function (req, res) {
+    const sql = `SELECT data_note.id, data_note.title, data_note.note, 
+                data_note.time, category_note.name as "name_category" 
+                FROM data_note LEFT JOIN category_note 
+                ON data_note.id_category=category_note.id`;
 
     connection.query(sql, function (error, rows, field) {
         if (error) {
@@ -23,13 +22,11 @@ exports.list_note = function (req, res) {
         }
     });
 };
-exports.list_note_id = function (req, res) {
-    const sql = 'SELECT ' +
-        'data_note.id, data_note.title, data_note.note, data_note.time, data_note.id_category, category_note.name as "name_category" ' +
-        'FROM data_note ' +
-        'LEFT JOIN category_note ' +
-        'ON data_note.id_category=category_note.id ' +
-        'WHERE data_note.id = "' + req.params.id + '"';
+exports.listNoteId = function (req, res) {
+    const sql = `SELECT data_note.id, data_note.title, data_note.note, data_note.time, category_note.name as "name_category"
+                 FROM data_note LEFT JOIN category_note 
+                 ON data_note.id_category=category_note.id 
+                 WHERE data_note.id = ${req.params.id}`;
 
     connection.query(sql, function (error, rows, field) {
         if (error) {
@@ -39,7 +36,7 @@ exports.list_note_id = function (req, res) {
         }
     });
 };
-exports.insert_note = function (req, res) {
+exports.insertNote = function (req, res) {
     let note = req.body.note;
     let id_category = req.body.id_category;
     let title = req.body.title;
@@ -64,7 +61,7 @@ exports.insert_note = function (req, res) {
             })
     }
 };
-exports.update_note = function (req, res) {
+exports.updateNote = function (req, res) {
     let id = req.params.id;
     let id_category = req.body.id_category;
     let note = req.body.note;
@@ -81,7 +78,7 @@ exports.update_note = function (req, res) {
         )
     }
 };
-exports.delete_note = function (req, res) {
+exports.deleteNote = function (req, res) {
 
     connection.query(`delete from data_note where id =?`, [req.params.id],
         function (error, result, fields) {
@@ -92,7 +89,7 @@ exports.delete_note = function (req, res) {
 };
 
 //Controller Category
-exports.list_category = function (req, res) {
+exports.listCategory = function (req, res) {
     connection.query(`select * from category_note`, function (error, rows, field) {
         if (error) {
             throw error;
@@ -102,7 +99,7 @@ exports.list_category = function (req, res) {
         }
     });
 };
-exports.insert_category = function (req, res) {
+exports.insertCategory = function (req, res) {
     let name = req.body.name;
 
     if (typeof name == 'undefined') {
@@ -124,7 +121,7 @@ exports.insert_category = function (req, res) {
             })
     }
 };
-exports.update_category = function (req, res) {
+exports.updateCategory = function (req, res) {
     let id = req.params.id;
     let name = req.body.name;
 
@@ -139,7 +136,7 @@ exports.update_category = function (req, res) {
         )
     }
 };
-exports.delete_category = function (req, res) {
+exports.deleteCategory = function (req, res) {
     connection.query(`delete from category_note where id =?`, [req.params.id],
         function (error, result, fields) {
             if (error) throw error;
