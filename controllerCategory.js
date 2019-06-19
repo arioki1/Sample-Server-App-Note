@@ -5,6 +5,7 @@ const connection = require('./connect');
 
 //Controller Category
 exports.category = function (req, res) {
+    const select = req.query.select;
     const searchBy = req.query.search_by;
     const search = req.query.search;
     const id = req.query.id;
@@ -12,22 +13,24 @@ exports.category = function (req, res) {
     const sort = req.query.sort;
 
     const page = req.query.page;
-    const limit = req.query.limit || 5;
-    let end = page * limit;
-    let start = end - limit;
+    const limit = req.query.limit;
+    let end = (page || 1) * (limit || 5);
+    let start = end - (limit || 5);
 
-    let sql = `SELECT * FROM category_note`;
+    let sql = "";
+    const table = 'category_note';
 
+    sql = (select) ? sql.concat(`SELECT ${select} FROM ${table} `) : sql.concat(`SELECT * FROM ${table} `);
     sql = (search || (search && searchBy) || id) ? sql.concat(`WHERE `) : sql;
-    sql = (search) ? sql.concat(`category_note.${searchBy ? searchBy : 'title'} LIKE '%${search}%' `) : sql;
+    sql = (search) ? sql.concat(`category_note.${searchBy || 'name'} LIKE '%${search}%' `) : sql;
     sql = (search && id) ? sql.concat(`AND `) : sql;
     sql = (id) ? sql.concat(`category_note.id = '${id}' `) : sql;
-    sql = (orderBy) ? sql.concat(`ORDER BY category_note.${orderBy ? orderBy : 'name'} `) : sql;
-    sql = (sort && orderBy) ? sql.concat(`${sort} `) : sql;
-    sql = (page) ? sql.concat(`LIMIT ${start}, ${end}`) : sql;
+    sql = (orderBy || sort) ? sql.concat(`ORDER BY category_note.${orderBy || 'name'} ${sort || 'DESC'} `) : sql;
+    sql = (page || limit) ? sql.concat(`LIMIT ${start}, ${end}`) : sql;
 
     connection.query(sql, function (error, rows, field) {
         if (error) {
+            console.log(error);
             response.ok("Note does not found", res);
         } else {
             (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not found", res);
