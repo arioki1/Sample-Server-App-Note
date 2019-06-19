@@ -1,5 +1,6 @@
 'use strict'
 
+
 module.exports = function (app) {
     const controller = require('./controller');
     //Route API Note
