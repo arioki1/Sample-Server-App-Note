@@ -4,11 +4,22 @@ module.exports = function (app) {
     const controller = require('./controller');
     //Route API Note
     app.route('/').get(controller.home);
-    app.route('/note').get(controller.listNote);
-    app.route('/note').post(controller.insertNote);
-    app.route('/note/:id').get(controller.listNoteId);
-    app.route('/note/:id').delete(controller.deleteNote);
-    app.route('/note/:id').patch(controller.updateNote);
+    app.route('/notes').get(function (req, res) {
+        console.log(req.query);
+        const url = req.query;
+        if ('search' in url) {
+            controller.searchNote(req, res)
+        } else if ('id' in url) {
+            controller.listNoteId(req, res);
+        } else if ('sort' in url) {
+            controller.sortNote(req, res);
+        } else {
+            controller.listNote(req, res)
+        }
+    });
+    app.route('/notes').post(controller.insertNote);
+    app.route('/notes/:id').delete(controller.deleteNote);
+    app.route('/notes/:id').patch(controller.updateNote);
 
     //Route API Category
     app.route('/category').get(controller.listCategory);
