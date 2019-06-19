@@ -2,9 +2,10 @@
 
 
 module.exports = function (app) {
-    const controller = require('./controller');
+    const controllerNotes = require('./controllerNotes');
+    const controllerCategory = require('./controllerCategory');
     //Route API Note
-    app.route('/').get(controller.home);
+    app.route('/').get(controllerNotes.home);
     app.route('/notes').get(function (req, res) {
         console.log(req.query);
         const url = req.query;
@@ -20,13 +21,13 @@ module.exports = function (app) {
             controller.listNote(req, res)
         }
     });
-    app.route('/notes').post(controller.insertNote);
-    app.route('/notes/:id').delete(controller.deleteNote);
-    app.route('/notes/:id').patch(controller.updateNote);
+    app.route('/notes').post(controllerNotes.insertNote);
+    app.route('/notes/:id').delete(controllerNotes.deleteNote);
+    app.route('/notes/:id').patch(controllerNotes.updateNote);
 
     //Route API Category
-    app.route('/category').get(controller.listCategory);
-    app.route('/category').post(controller.insertCategory);
-    app.route('/category/:id').delete(controller.deleteCategory);
-    app.route('/category/:id').patch(controller.updateCategory);
+    app.route('/category').get(controllerCategory.listCategory);
+    app.route('/category').post(controllerCategory.insertCategory);
+    app.route('/category/:id').delete(controllerCategory.deleteCategory);
+    app.route('/category/:id').patch(controllerCategory.updateCategory);
 };
