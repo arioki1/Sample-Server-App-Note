@@ -4,13 +4,33 @@ const response = require('./response');
 const connection = require('./connect');
 
 //Controller Category
-exports.listCategory = function (req, res) {
-    connection.query(`select * from category_note`, function (error, rows, field) {
+exports.category = function (req, res) {
+    const searchBy = req.query.search_by;
+    const search = req.query.search;
+    const id = req.query.id;
+    const orderBy = req.query.order_by;
+    const sort = req.query.sort;
+
+    const page = req.query.page;
+    const limit = req.query.limit || 5;
+    let end = page * limit;
+    let start = end - limit;
+
+    let sql = `SELECT * FROM category_note`;
+
+    sql = (search || (search && searchBy) || id) ? sql.concat(`WHERE `) : sql;
+    sql = (search) ? sql.concat(`category_note.${searchBy ? searchBy : 'title'} LIKE '%${search}%' `) : sql;
+    sql = (search && id) ? sql.concat(`AND `) : sql;
+    sql = (id) ? sql.concat(`category_note.id = '${id}' `) : sql;
+    sql = (orderBy) ? sql.concat(`ORDER BY category_note.${orderBy ? orderBy : 'name'} `) : sql;
+    sql = (sort && orderBy) ? sql.concat(`${sort} `) : sql;
+    sql = (page) ? sql.concat(`LIMIT ${start}, ${end}`) : sql;
+
+    connection.query(sql, function (error, rows, field) {
         if (error) {
-            throw error;
-            response.error(res);
+            response.ok("Note does not found", res);
         } else {
-            response.ok(rows, res);
+            (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not found", res);
         }
     });
 };
