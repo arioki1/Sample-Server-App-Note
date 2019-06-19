@@ -4,6 +4,19 @@ const response = require('./response');
 const connection = require('./connect');
 const dateFormat = require('dateformat');
 
+
+/*function getCountNote(callback)
+{
+    connection.query('SELECT COUNT(*) as total FROM data_note', function(err, result)
+    {
+        if (err)
+            callback(err,null);
+        else
+            callback(null,result[0].total);
+
+    });
+
+}*/
 //Controler Note
 exports.home = function (req, res) {
     response.ok('Welcome to Server Sample Note App API', res);
@@ -114,6 +127,46 @@ exports.sortNote = function (req, res) {
         }
     });
 };
+exports.pageNote = function (req, res) {
+    let page = req.query.page || 0;
+    ;
+    let limit = 5;
+    let countNote;
+    let maxPage;
+    let start;
+    let end;
+    /*
+    //call Fn for db query with callback
+        getCountNote(function(err,data){
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR : ",err);
+            } else {
+                // code to execute on data retrieval
+                countNote = data;
+            }
+            console.log(countNote);
+        });
+
+        maxPage = countNote/limit;*/
+    end = page * limit;
+    start = end - limit;
+
+    const sql = `SELECT data_note.id, data_note.title, data_note.note, 
+                data_note.time, category_note.name as "name_category"
+                FROM data_note LEFT JOIN category_note 
+                ON data_note.id_category=category_note.id
+                ORDER BY data_note.title ASC
+                LIMIT ${start}, ${end}`;
+    connection.query(sql, function (error, rows, field) {
+        if (error) {
+            throw error;
+        } else {
+            (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not exit", res);
+        }
+    });
+
+};
 
 //Controller Category
 exports.listCategory = function (req, res) {
@@ -171,3 +224,4 @@ exports.deleteCategory = function (req, res) {
         }
     )
 };
+

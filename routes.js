@@ -13,6 +13,8 @@ module.exports = function (app) {
             controller.listNoteId(req, res);
         } else if ('sort' in url) {
             controller.sortNote(req, res);
+        } else if ('page' in url) {
+            controller.pageNote(req, res);
         } else {
             controller.listNote(req, res)
         }
