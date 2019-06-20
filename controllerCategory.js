@@ -31,9 +31,9 @@ exports.category = function (req, res) {
     connection.query(sql, function (error, rows, field) {
         if (error) {
             console.log(error);
-            response.ok("Note does not found", res);
+            response.success("Note does not found", res);
         } else {
-            (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not found", res);
+            (rows.length > 0) ? response.success(rows, res) : response.success("Note does not found", res);
         }
     });
 };
@@ -41,7 +41,7 @@ exports.insertCategory = function (req, res) {
     let name = req.body.name;
 
     if (typeof name == 'undefined') {
-        response.ok("Field name cannot null or empty", res);
+        response.success("Field name cannot null or empty", res);
     } else {
         connection.query(`INSERT INTO category_note set name=?`, [name],
             function (error, rows, field) {
@@ -54,7 +54,7 @@ exports.insertCategory = function (req, res) {
                         data: rows,
                         message: 'New data has been created',
                     };
-                    response.ok(data, res)
+                    response.success(data, res)
                 }
             })
     }
@@ -64,12 +64,12 @@ exports.updateCategory = function (req, res) {
     let name = req.body.name;
 
     if (typeof name == 'undefined') {
-        response.ok("Field name cannot null or empty", res);
+        response.success("Field name cannot null or empty", res);
     } else {
         connection.query(`UPDATE category_note SET name=? WHERE id=?`, [name, id],
             function (error, result, field) {
                 if (error) throw error;
-                (result.affectedRows == 0) ? response.ok("Update Category didn't work", res) : response.ok("Category has been update!", res);
+                (result.affectedRows == 0) ? response.success("Update Category didn't work", res) : response.success("Category has been update!", res);
             }
         )
     }
@@ -78,7 +78,7 @@ exports.deleteCategory = function (req, res) {
     connection.query(`delete from category_note where id =?`, [req.params.id],
         function (error, result, fields) {
             if (error) throw error;
-            (result.affectedRows == 0) ? response.ok("id not found!", res) : response.ok("Category has been deleted!", res);
+            (result.affectedRows == 0) ? response.success("id not found!", res) : response.success("Category has been deleted!", res);
         }
     )
 };

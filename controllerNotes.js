@@ -1,25 +1,14 @@
 'use strict'
 
 const response = require('./response');
-const connection = require('./connect')
-
+const connection = require('./connect');
+const modelNotes = require('./modelNotes');
 
 const dateFormat = require('dateformat');
 
-function getCountNote(callback) {
-    connection.query('SELECT COUNT(*) as total FROM data_note', function (err, result) {
-        if (err)
-            callback(err, null);
-        else
-            callback(null, result[0].total);
-
-    });
-
-}
-
 //Controler Note
 exports.home = function (req, res) {
-    response.ok('Welcome to Server Sample Note App API', res);
+    response.success('Welcome to Server Sample Note App API', res);
 };
 exports.insertNote = function (req, res) {
     let note = req.body.note;
@@ -28,7 +17,7 @@ exports.insertNote = function (req, res) {
     let time = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
 
     if (typeof note == 'undefined' || typeof id_category == 'undefined' || typeof title == 'undefined') {
-        response.ok("Field note or id_category cannot null or empty", res);
+        response.success("Field note or id_category cannot null or empty", res);
     } else {
         connection.query(`INSERT INTO data_note set title=?, note=?, time=?, id_category=?;`, [title, note, time, id_category],
             function (error, rows, field) {
@@ -41,7 +30,7 @@ exports.insertNote = function (req, res) {
                         data: rows,
                         message: 'New data has been created',
                     }
-                    response.ok(data, res)
+                    response.success(data, res)
                 }
             })
     }
@@ -60,8 +49,8 @@ exports.updateNote = function (req, res) {
     sql = sql.concat(`WHERE id="${id}" `);
     connection.query(sql,
         function (error, result, field) {
-            if (error) response.ok("Update Note didn't work", res);
-            (result.affectedRows == 0) ? response.ok("Update Note didn't work", res) : response.ok("Note has been update!", res);
+            if (error) response.success("Update Note didn't work", res);
+            (result.affectedRows == 0) ? response.success("Update Note didn't work", res) : response.success("Note has been update!", res);
         }
     )
 };
@@ -70,65 +59,51 @@ exports.deleteNote = function (req, res) {
     connection.query(`delete from data_note where id =?`, [req.params.id],
         function (error, result, fields) {
             if (error) throw error;
-            (result.affectedRows == 0) ? response.ok("id not found!", res) : response.ok("Note has been deleted!", res);
+            (result.affectedRows == 0) ? response.success("id not found!", res) : response.success("Note has been deleted!", res);
         }
     )
 };
 exports.note = function (req, res) {
-    const searchBy = req.query.search_by;
-    const search = req.query.search;
-    const id = req.query.id;
-    const orderBy = req.query.order_by;
-    const sort = req.query.sort;
-    let select = req.query.select;
+    modelNotes.getCount(function (result) {
+        modelNotes.getCountQuery(req, function (sql, jumlah) {
+            connection.query(sql, function (error, rows, field) {
 
-    const page = req.query.page;
-    const limit = req.query.limit || 5;
+                let page = req.query.page || 1;
+                let limit = req.query.limit;
+                const def_limit = 5;
 
-    let end = page * limit;
-    let start = end - limit;
+                let end = page * (limit || def_limit);
+                /*console.log("limit" +limit+" def "+def_limit);*/
 
-    let select_mode = (select) ? select : ',';
-    select = select_mode.split(",");
+                let start = end - (limit || def_limit);
+                /* console.log(`logika ${end} ${limit} ${def_limit}`);*/
+                let amount_page = Math.ceil((rows.length || 1) / (limit || def_limit));
+                /*console.log(`Apakah ${end>jumlah}`);*/
 
-    let sql = "";
+                let next_page = (page * limit < jumlah) ? Number(page) + 1 : Number(page);
+                /*console.log(`Mulai ${start} Selesai ${end} max ${jumlah} amount_page ${amount_page} next_page ${next_page}`);*/
 
-    let loop = [];
-    for (let i = 0; i < select.length; i++) {
-        let val = select[i];
-        switch (val) {
-            case 'time':
-                loop.push("data_note.time");
-                break;
-            case 'id':
-                loop.push("data_note.id");
-                break;
-            case 'title':
-                loop.push("data_note.title");
-                break;
-            case 'note':
-                loop.push("data_note.title");
-                break;
-            case 'category':
-                loop.push('category_note.name as category');
-                break;
-        }
-    }
+                sql = sql.concat(`LIMIT ${start}, ${end}`);
 
-    sql = loop.length > 0 ? sql.concat(`SELECT ${loop.join()} `) : sql.concat(`SELECT data_note.id, data_note.title, data_note.note, data_note.time, category_note.name as name_category `);
-    sql = sql.concat(`FROM data_note LEFT JOIN category_note ON data_note.id_category=category_note.id `);
-    sql = (search || (search && searchBy) || id) ? sql.concat(`WHERE `) : sql;
-    sql = (search) ? sql.concat(`data_note.${searchBy || 'title'} LIKE '%${search}%' `) : sql;
-    sql = (search && id) ? sql.concat(`AND `) : sql;
-    sql = (id) ? sql.concat(`data_note.id = '${id}' `) : sql;
-    sql = (orderBy || sort) ? sql.concat(`ORDER BY data_note.${orderBy ? orderBy : 'time'} ${sort || 'DESC'} `) : sql;
-    sql = (page) ? sql.concat(`LIMIT ${start}, ${end}`) : sql;
+                connection.query(sql, function (error, rows, field) {
+                    if (error) {
+                        response.success("Note does not found", res);
+                    } else {
+                        const data = {
+                            status: 200,
+                            values: rows,
+                            amounts_note: jumlah,
+                            amounts_page: amount_page,
+                            current_page: page,
+                            next_page: next_page,
+                            limit: limit,
+                        };
 
-    connection.query(sql, function (error, rows, field) {
-        if (error) {
-            response.ok("Note does not found", res);
-        } else {
-            (rows.length > 0) ? response.ok(rows, res) : response.ok("Note does not found", res);
-        }
+                        (rows.length > 0) ? response.notes(data, res) : response.errorWithCode(400, 'Note does not found', res);
+                    }
+                });
+            })
+        });
+
     });
 };
