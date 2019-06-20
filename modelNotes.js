@@ -3,12 +3,13 @@
 const connection = require('./connect');
 
 exports.getCount = function (callback) {
-    connection.query('SELECT COUNT(*) as total FROM data_note', function (err, result) {
+    connection.query('SELECT COUNT(*) as count FROM data_note', function (err, result) {
         if (err)
             console.log(err);
         else
-            callback(result[0].total);
+            callback(result[0].count);
     });
+
 };
 exports.getCountQuery = function (req, callback) {
     const searchBy = req.query.search_by;
@@ -60,6 +61,4 @@ exports.getCountQuery = function (req, callback) {
             callback(sql, result.length);
     });
 };
-
-
 

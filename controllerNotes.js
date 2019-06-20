@@ -65,7 +65,7 @@ exports.deleteNote = function (req, res) {
 };
 exports.note = function (req, res) {
     modelNotes.getCount(function (result) {
-        modelNotes.getCountQuery(req, function (sql, jumlah) {
+        modelNotes.getCountQuery(req, function (sql, maxCount) {
             connection.query(sql, function (error, rows, field) {
 
                 let page = req.query.page || 1;
@@ -73,15 +73,12 @@ exports.note = function (req, res) {
                 const def_limit = 5;
 
                 let end = page * (limit || def_limit);
-                /*console.log("limit" +limit+" def "+def_limit);*/
 
                 let start = end - (limit || def_limit);
-                /* console.log(`logika ${end} ${limit} ${def_limit}`);*/
-                let amount_page = Math.ceil((rows.length || 1) / (limit || def_limit));
-                /*console.log(`Apakah ${end>jumlah}`);*/
 
-                let next_page = (page * limit < jumlah) ? Number(page) + 1 : Number(page);
-                /*console.log(`Mulai ${start} Selesai ${end} max ${jumlah} amount_page ${amount_page} next_page ${next_page}`);*/
+                let amount_page = Math.ceil((rows.length || 1) / (limit || def_limit));
+
+                let next_page = (page * limit < maxCount) ? Number(page) + 1 : Number(page);
 
                 sql = sql.concat(`LIMIT ${start}, ${end}`);
 
@@ -91,12 +88,12 @@ exports.note = function (req, res) {
                     } else {
                         const data = {
                             status: 200,
-                            values: rows,
-                            amounts_note: jumlah,
+                            amounts_note: maxCount,
                             amounts_page: amount_page,
                             current_page: page,
                             next_page: next_page,
                             limit: limit,
+                            values: rows,
                         };
 
                         (rows.length > 0) ? response.notes(data, res) : response.errorWithCode(400, 'Note does not found', res);
