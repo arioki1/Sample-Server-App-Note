@@ -1,37 +1,25 @@
 'use strict'
 
 const response = require('./response');
-const connection = require('./connect');
+const connection = require('./connect')
+
+
 const dateFormat = require('dateformat');
 
-/*function getCountNote(callback)
-{
-    connection.query('SELECT COUNT(*) as total FROM data_note', function(err, result)
-    {
+function getCountNote(callback) {
+    connection.query('SELECT COUNT(*) as total FROM data_note', function (err, result) {
         if (err)
-            callback(err,null);
+            callback(err, null);
         else
-            callback(null,result[0].total);
+            callback(null, result[0].total);
 
     });
 
-}*/
+}
+
 //Controler Note
 exports.home = function (req, res) {
     response.ok('Welcome to Server Sample Note App API', res);
-};
-exports.listNote = function (req, res) {
-    const sql = `SELECT data_note.id, data_note.title, data_note.note, 
-                data_note.time, category_note.name as "name_category" 
-                FROM data_note LEFT JOIN category_note 
-                ON data_note.id_category=category_note.id`;
-    connection.query(sql, function (error, rows, field) {
-        if (error) {
-            throw error;
-        } else {
-            response.ok(rows, res);
-        }
-    });
 };
 exports.insertNote = function (req, res) {
     let note = req.body.note;
@@ -71,11 +59,11 @@ exports.updateNote = function (req, res) {
     sql = (id_category) ? sql.concat(`id_category="${id_category}" `) : sql;
     sql = sql.concat(`WHERE id="${id}" `);
     connection.query(sql,
-            function (error, result, field) {
-                if (error) response.ok("Update Note didn't work", res);
-                (result.affectedRows == 0) ? response.ok("Update Note didn't work", res) : response.ok("Note has been update!", res);
-            }
-        )
+        function (error, result, field) {
+            if (error) response.ok("Update Note didn't work", res);
+            (result.affectedRows == 0) ? response.ok("Update Note didn't work", res) : response.ok("Note has been update!", res);
+        }
+    )
 };
 exports.deleteNote = function (req, res) {
 
@@ -92,23 +80,48 @@ exports.note = function (req, res) {
     const id = req.query.id;
     const orderBy = req.query.order_by;
     const sort = req.query.sort;
+    let select = req.query.select;
 
     const page = req.query.page;
     const limit = req.query.limit || 5;
+
     let end = page * limit;
     let start = end - limit;
 
-    let sql = `SELECT data_note.id, data_note.title, data_note.note, 
-                data_note.time, category_note.name as "name_category" 
-                FROM data_note LEFT JOIN category_note 
-                ON data_note.id_category=category_note.id `;
+    let select_mode = (select) ? select : ',';
+    select = select_mode.split(",");
 
+    let sql = "";
+
+    let loop = [];
+    for (let i = 0; i < select.length; i++) {
+        let val = select[i];
+        switch (val) {
+            case 'time':
+                loop.push("data_note.time");
+                break;
+            case 'id':
+                loop.push("data_note.id");
+                break;
+            case 'title':
+                loop.push("data_note.title");
+                break;
+            case 'note':
+                loop.push("data_note.title");
+                break;
+            case 'category':
+                loop.push('category_note.name as category');
+                break;
+        }
+    }
+
+    sql = loop.length > 0 ? sql.concat(`SELECT ${loop.join()} `) : sql.concat(`SELECT data_note.id, data_note.title, data_note.note, data_note.time, category_note.name as name_category `);
+    sql = sql.concat(`FROM data_note LEFT JOIN category_note ON data_note.id_category=category_note.id `);
     sql = (search || (search && searchBy) || id) ? sql.concat(`WHERE `) : sql;
-    sql = (search) ? sql.concat(`data_note.${searchBy ? searchBy : 'title'} LIKE '%${search}%' `) : sql;
+    sql = (search) ? sql.concat(`data_note.${searchBy || 'title'} LIKE '%${search}%' `) : sql;
     sql = (search && id) ? sql.concat(`AND `) : sql;
     sql = (id) ? sql.concat(`data_note.id = '${id}' `) : sql;
-    sql = (orderBy) ? sql.concat(`ORDER BY data_note.${orderBy ? orderBy : 'title'} `) : sql;
-    sql = (sort && orderBy) ? sql.concat(`${sort} `) : sql;
+    sql = (orderBy || sort) ? sql.concat(`ORDER BY data_note.${orderBy ? orderBy : 'time'} ${sort || 'DESC'} `) : sql;
     sql = (page) ? sql.concat(`LIMIT ${start}, ${end}`) : sql;
 
     connection.query(sql, function (error, rows, field) {
