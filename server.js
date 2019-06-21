@@ -37,4 +37,16 @@ app.use(bodyParser.json());
 
 routes(app);
 app.listen(port);
-console.log('Server Started');
+
+const os = require('os');
+let networkInterfaces = os.networkInterfaces();
+for (let inet in networkInterfaces) {
+    let addresses = networkInterfaces[inet];
+    for (let i = 0; i < addresses.length; i++) {
+        let address = addresses[i];
+        if (!address.internal) {
+            console.log(`_____________Server Started ${address.address}:${port}____________________`);
+        }
+    }
+}
+

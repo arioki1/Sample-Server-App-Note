@@ -65,22 +65,22 @@ exports.deleteNote = function (req, res) {
 };
 exports.note = function (req, res) {
     modelNotes.getCount(function (result) {
-        modelNotes.getCountQuery(req, function (sql, maxCount) {
+        modelNotes.getCountQuery(req, res, function (sql, maxCount) {
             connection.query(sql, function (error, rows, field) {
 
                 let page = req.query.page || 1;
-                let limit = req.query.limit;
-                const def_limit = 5;
+                let limit = req.query.limit || 5;
+                //const def_limit = 5;
 
-                let end = page * (limit || def_limit);
+                let end = (page - 1) * limit;
 
-                let start = end - (limit || def_limit);
+                let start = end - limit;
 
-                let amount_page = Math.ceil((rows.length || 1) / (limit || def_limit));
-
+                let amount_page = Math.ceil((rows.length || 1) / limit);
+                console.log("jumlah : " + page + " " + limit + " < " + maxCount + "K ali : " + (page) * limit);
                 let next_page = (page * limit < maxCount) ? Number(page) + 1 : Number(page);
 
-                sql = sql.concat(`LIMIT ${start}, ${end}`);
+                sql = sql.concat(`LIMIT ${limit} OFFSET ${end}`);
 
                 connection.query(sql, function (error, rows, field) {
                     if (error) {
@@ -90,7 +90,7 @@ exports.note = function (req, res) {
                             status: 200,
                             amounts_note: maxCount,
                             amounts_page: amount_page,
-                            current_page: page,
+                            current_page: Number(page),
                             next_page: next_page,
                             limit: limit,
                             values: rows,

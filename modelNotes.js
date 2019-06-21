@@ -1,6 +1,7 @@
 'use strict'
 
 const connection = require('./connect');
+const response = require('./response');
 
 exports.getCount = function (callback) {
     connection.query('SELECT COUNT(*) as count FROM data_note', function (err, result) {
@@ -11,12 +12,12 @@ exports.getCount = function (callback) {
     });
 
 };
-exports.getCountQuery = function (req, callback) {
+exports.getCountQuery = function (req, res, callback) {
     const searchBy = req.query.search_by;
     const search = req.query.search;
     const id = req.query.id;
     const orderBy = req.query.order_by;
-    const sort = req.query.sort;
+    const sort = req.query.sort_by;
     let select = req.query.select;
 
     let select_mode = (select) ? select : ',';
@@ -53,10 +54,10 @@ exports.getCountQuery = function (req, callback) {
     sql = (search && id) ? sql.concat(`AND `) : sql;
     sql = (id) ? sql.concat(`data_note.id = '${id}' `) : sql;
     sql = sql.concat(`ORDER BY data_note.${orderBy || 'time'} ${sort || 'DESC'} `);
-
     connection.query(sql, function (err, result) {
+
         if (err)
-            console.log(err);
+            response.success("Note does not found", res);
         else
             callback(sql, result.length);
     });
