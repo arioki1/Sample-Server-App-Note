@@ -46,6 +46,7 @@ exports.updateNote = function (req, res) {
     sql = (note && id_category) ? sql.concat(`, `) : sql;
     sql = (id_category) ? sql.concat(`id_category="${id_category}" `) : sql;
     sql = sql.concat(`WHERE id="${id}" `);
+
     connection.query(sql,
         function (error, result, field) {
             if (error || !result.affectedRows) response.errorWithCode(400,"Update Note didn't work", res);
@@ -65,20 +66,13 @@ exports.deleteNote = function (req, res) {
     )
 };
 exports.note = function (req, res) {
-    modelNotes.getCount(function (result) {
-        modelNotes.getCountQuery(req, res, function (sql, maxCount) {
+    modelNotes.getCountQuery(req, res, function (sql, maxCount) {
             connection.query(sql, function (error, rows, field) {
 
                 let page = req.query.page || 1;
                 let limit = req.query.limit || 5;
-                //const def_limit = 5;
-
                 let end = (page - 1) * limit;
-
-                let start = end - limit;
-
                 let amount_page = Math.ceil((rows.length || 1) / limit);
-                console.log("jumlah : " + page + " " + limit + " < " + maxCount + "K ali : " + (page) * limit);
                 let next_page = (page * limit < maxCount) ? Number(page) + 1 : Number(page);
 
                 sql = sql.concat(`LIMIT ${limit} OFFSET ${end}`);
@@ -102,6 +96,4 @@ exports.note = function (req, res) {
                 });
             })
         });
-
-    });
 };

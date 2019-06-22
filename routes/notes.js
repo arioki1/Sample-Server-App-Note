@@ -1,6 +1,5 @@
 'use strict'
 
-
 module.exports = function (app) {
     const controllerNotes = require('../controllers/controllerNotes');
     const controllerCategory = require('../controllers/controllerCategory');

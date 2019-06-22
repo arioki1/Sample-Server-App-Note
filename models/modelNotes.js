@@ -55,6 +55,7 @@ exports.getCountQuery = function (req, res, callback) {
     sql = (search && id) ? sql.concat(`AND `) : sql;
     sql = (id) ? sql.concat(`data_note.id = '${id}' `) : sql;
     sql = sql.concat(`ORDER BY data_note.${orderBy || 'time'} ${sort || 'DESC'} `);
+
     connection.query(sql, function (err, result) {
 
         if (err)

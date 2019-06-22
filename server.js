@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './config/.env' })
+require('dotenv').config()
 
 const express = require('express');
 const app = express();
@@ -8,11 +8,12 @@ const dateFormat = require('dateformat');
 const port = process.env.SERVER_PORT || 3000;
 const cors = require('cors');
 
-const whitelist = ['http://192.168.6.101', 'chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop'];
+const whitelist = ['http://192.168.6.101', 'chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop',undefined];
 
 const corsOptions = {
     origin: function (origin, next) {
-        console.log(origin);
+        console.log("[CROS]");
+        console.log("Origin : "+origin);
         if (whitelist.indexOf(origin) !== -1) {
             next()
         } else {
@@ -26,13 +27,14 @@ app.use(
     bodyParser.urlencoded({
         extended: true,
     }),
-    cors(),
     function (req, res, next) {
-        console.log(`\nTIME: ${dateFormat(new Date(), "yyyy-mm-dd h:MM:ss")} \nHOST : ${req.headers.host} \nURL : ${req.url} \nMETHOD ${req.method} \nuser-agent ${req.headers["user-agent"]} \n`);
+        console.log("[LOG]");
+        console.log(`\nTIME : ${dateFormat(new Date(), "yyyy-mm-dd h:MM:ss")} \nHOST : ${req.headers.host} \nURL : ${req.url} \nMETHOD : ${req.method} \nUser Agent : ${req.headers["useragent"]} \n`);
         //console.log(res);
         next();
 
     },
+    cors(corsOptions),
 );
 
 app.use(bodyParser.json());
