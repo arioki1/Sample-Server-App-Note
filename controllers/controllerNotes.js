@@ -79,7 +79,7 @@ exports.note = function (req, res) {
 
                 connection.query(sql, function (error, rows, field) {
                     if (error) {
-                        response.success("Note does not found", res);
+                        response.errorWithCode(400,"Note does not found", res);
                     } else {
                         const data = {
                             status: 200,
