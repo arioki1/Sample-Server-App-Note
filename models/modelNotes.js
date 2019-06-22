@@ -1,7 +1,8 @@
 'use strict'
 
-const connection = require('./connect');
-const response = require('./response');
+const connection = require('../config/database');
+const response = require('../libs/response');
+
 
 exports.getCount = function (callback) {
     connection.query('SELECT COUNT(*) as count FROM data_note', function (err, result) {
@@ -57,7 +58,7 @@ exports.getCountQuery = function (req, res, callback) {
     connection.query(sql, function (err, result) {
 
         if (err)
-            response.success("Note does not found", res);
+            response.errorWithCode(404,"Note does not found", res);
         else
             callback(sql, result.length);
     });

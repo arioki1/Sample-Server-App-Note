@@ -1,7 +1,7 @@
 'use strict'
 
-const response = require('./response');
-const connection = require('./connect');
+const response = require('../libs/response');
+const connection = require('../config/database');
 
 //Controller Category
 exports.category = function (req, res) {

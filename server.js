@@ -1,9 +1,9 @@
-require('dotenv').config();
+require('dotenv').config({ path: './config/.env' })
 
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const routes = require('./routes');
+const routes = require('./routes/notes');
 const dateFormat = require('dateformat');
 const port = process.env.SERVER_PORT || 3000;
 const cors = require('cors');
@@ -28,8 +28,10 @@ app.use(
     }),
     cors(),
     function (req, res, next) {
-        console.log(`TIME: ${dateFormat(new Date(), "yyyy-mm-dd h:MM:ss")} HOST ${req.headers.host}  PATH : ${req.path} METHOD ${req.method} ORIGIN ${req.headers.origin}`);
+        console.log(`\nTIME: ${dateFormat(new Date(), "yyyy-mm-dd h:MM:ss")} \nHOST : ${req.headers.host} \nURL : ${req.url} \nMETHOD ${req.method} \nuser-agent ${req.headers["user-agent"]} \n`);
+        //console.log(res);
         next();
+
     },
 );
 

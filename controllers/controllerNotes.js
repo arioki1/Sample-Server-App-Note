@@ -1,9 +1,8 @@
 'use strict'
 
-const response = require('./response');
-const connection = require('./connect');
-const modelNotes = require('./modelNotes');
-
+const response = require('../libs/response');
+const connection = require('../config/database');
+const modelNotes = require('../models/modelNotes');
 const dateFormat = require('dateformat');
 
 //Controler Note
@@ -49,8 +48,10 @@ exports.updateNote = function (req, res) {
     sql = sql.concat(`WHERE id="${id}" `);
     connection.query(sql,
         function (error, result, field) {
-            if (error) response.success("Update Note didn't work", res);
-            (result.affectedRows == 0) ? response.success("Update Note didn't work", res) : response.success("Note has been update!", res);
+            if (error || !result.affectedRows) response.errorWithCode(400,"Update Note didn't work", res);
+            else {
+                (result.affectedRows == 0) ? response.errorWithCode(400,"Update Note didn't work", res) : response.success("Note has been update!", res);
+            }
         }
     )
 };
