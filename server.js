@@ -3,7 +3,8 @@ require('dotenv').config({ path: './config/.env' });
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const routes = require('./routes/notes');
+const routesNote = require('./routes/notes');
+const routesCategory = require('./routes/category');
 const dateFormat = require('dateformat');
 const port = process.env.SERVER_PORT || 3000;
 const cors = require('cors');
@@ -38,7 +39,8 @@ app.use(
 
 app.use(bodyParser.json());
 
-routes(app);
+routesNote(app);
+routesCategory(app);
 app.listen(port);
 
 const os = require('os');
