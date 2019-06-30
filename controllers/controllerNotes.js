@@ -16,7 +16,7 @@ exports.insertNote = function (req, res) {
     let time = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
 
     if (typeof note == 'undefined' || typeof id_category == 'undefined' || typeof title == 'undefined') {
-        response.success("Field note or id_category cannot null or empty", res);
+        response.errorWithCode(400,"Field note or id_category cannot null or empty", res);
     } else {
         connection.query(`INSERT INTO data_note set title=?, note=?, time=?, id_category=?;`, [title, note, time, id_category],
             function (error, rows, field) {
@@ -46,7 +46,7 @@ exports.updateNote = function (req, res) {
     sql = (note && id_category) ? sql.concat(`, `) : sql;
     sql = (id_category) ? sql.concat(`id_category="${id_category}" `) : sql;
     sql = sql.concat(`WHERE id="${id}" `);
-
+	console.log(sql);
     connection.query(sql,
         function (error, result, field) {
             if (error || !result.affectedRows) response.errorWithCode(400,"Update Note didn't work", res);
@@ -70,7 +70,7 @@ exports.note = function (req, res) {
             connection.query(sql, function (error, rows, field) {
 
                 let page = req.query.page || 1;
-                let limit = req.query.limit || 5;
+                let limit = req.query.limit || 10;
                 let end = (page - 1) * limit;
                 let amount_page = Math.ceil((rows.length || 1) / limit);
                 let next_page = (page * limit < maxCount) ? Number(page) + 1 : Number(page);
