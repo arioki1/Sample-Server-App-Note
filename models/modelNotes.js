@@ -18,7 +18,7 @@ exports.getCountQuery = function (req, res, callback) {
     const search = req.query.search;
     const id = req.query.id;
     const orderBy = req.query.order_by;
-    const sort = req.query.sort;
+    const sort = req.query.sort_by;
     let select = req.query.select;
 
     let select_mode = (select) ? select : ',';
@@ -48,15 +48,14 @@ exports.getCountQuery = function (req, res, callback) {
         }
     }
 
-    sql = loop.length > 0 ? sql.concat(`SELECT ${loop.join()} `) : sql.concat(`SELECT data_note.id, data_note.title, data_note.note, data_note.time, category_note.name as name_category, category_note.id as id_category `);
+    sql = loop.length > 0 ? sql.concat(`SELECT ${loop.join()} `) : sql.concat(`SELECT data_note.id, data_note.title, data_note.note, data_note.time, category_note.name as name_category `);
     sql = sql.concat(`FROM data_note LEFT JOIN category_note ON data_note.id_category=category_note.id `);
     sql = (search || (search && searchBy) || id) ? sql.concat(`WHERE `) : sql;
     sql = (search) ? sql.concat(`data_note.${searchBy || 'title'} LIKE '%${search}%' `) : sql;
     sql = (search && id) ? sql.concat(`AND `) : sql;
     sql = (id) ? sql.concat(`data_note.id = '${id}' `) : sql;
-	console.log(sql);
     sql = sql.concat(`ORDER BY data_note.${orderBy || 'time'} ${sort || 'DESC'} `);
-	console.log(sql);
+
     connection.query(sql, function (err, result) {
 
         if (err)
