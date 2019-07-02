@@ -16,24 +16,32 @@ exports.insertNote = function (req, res) {
     let time = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
 
     if (typeof note == 'undefined' || typeof id_category == 'undefined' || typeof title == 'undefined') {
-        response.success("Field note or id_category cannot null or empty", res);
+        response.errorWithCode(400, "Field note or id_category cannot null or empty", res)
     } else {
         connection.query(`INSERT INTO data_note set title=?, note=?, time=?, id_category=?;`, [title, note, time, id_category],
             function (error, rows, field) {
                 if (error) {
-                    throw error
-                    response.error(res)
+                    response.errorWithCode(400, "Field note or id_category cannot null or empty", res)
                 } else {
-                    let data = {
-                        error: false,
-                        data: rows,
-                        message: 'New data has been created',
-                    }
-                    response.success(data, res)
+
+                    connection.query(`SELECT * FROM data_note ORDER BY id DESC LIMIT 1`,
+                        function (error, rows, field) {
+                            if (error) {
+                                response.errorWithCode(400, "Field note or id_category cannot null or empty", res)
+                            } else {
+                                let data = {
+                                    error: false,
+                                    data: rows,
+                                    message: 'New data has been created1',
+                                }
+                                response.success(data, res)
+                            }
+                        })
                 }
             })
     }
 };
+
 exports.updateNote = function (req, res) {
     let id = req.params.id;
     let id_category = req.body.id_category;
@@ -49,9 +57,9 @@ exports.updateNote = function (req, res) {
 
     connection.query(sql,
         function (error, result, field) {
-            if (error || !result.affectedRows) response.errorWithCode(400,"Update Note didn't work", res);
+            if (error || !result.affectedRows) response.errorWithCode(400, "Update Note didn't work", res);
             else {
-                (result.affectedRows == 0) ? response.errorWithCode(400,"Update Note didn't work", res) : response.success("Note has been update!", res);
+                (result.affectedRows == 0) ? response.errorWithCode(400, "Update Note didn't work", res) : response.success("Note has been update!", res);
             }
         }
     )
@@ -67,33 +75,33 @@ exports.deleteNote = function (req, res) {
 };
 exports.note = function (req, res) {
     modelNotes.getCountQuery(req, res, function (sql, maxCount) {
+        connection.query(sql, function (error, rows, field) {
+
+            let page = req.query.page || 1;
+            let limit = req.query.limit || 5;
+            let end = (page - 1) * limit;
+            let amount_page = Math.ceil((rows.length || 1) / limit);
+            let next_page = (page * limit < maxCount) ? Number(page) + 1 : Number(page);
+
+            sql = sql.concat(`LIMIT ${limit} OFFSET ${end}`);
+
             connection.query(sql, function (error, rows, field) {
+                if (error) {
+                    response.errorWithCode(400, "Note does not found", res);
+                } else {
+                    const data = {
+                        status: 200,
+                        amounts_note: maxCount,
+                        amounts_page: amount_page,
+                        current_page: Number(page),
+                        next_page: next_page,
+                        limit: limit,
+                        values: rows,
+                    };
 
-                let page = req.query.page || 1;
-                let limit = req.query.limit || 5;
-                let end = (page - 1) * limit;
-                let amount_page = Math.ceil((rows.length || 1) / limit);
-                let next_page = (page * limit < maxCount) ? Number(page) + 1 : Number(page);
-
-                sql = sql.concat(`LIMIT ${limit} OFFSET ${end}`);
-
-                connection.query(sql, function (error, rows, field) {
-                    if (error) {
-                        response.errorWithCode(400,"Note does not found", res);
-                    } else {
-                        const data = {
-                            status: 200,
-                            amounts_note: maxCount,
-                            amounts_page: amount_page,
-                            current_page: Number(page),
-                            next_page: next_page,
-                            limit: limit,
-                            values: rows,
-                        };
-
-                        (rows.length > 0) ? response.notes(data, res) : response.errorWithCode(400, 'Note does not found', res);
-                    }
-                });
-            })
-        });
+                    (rows.length > 0) ? response.notes(data, res) : response.errorWithCode(400, 'Note does not found', res);
+                }
+            });
+        })
+    });
 };
