@@ -23,8 +23,12 @@ exports.insertNote = function (req, res) {
                 if (error) {
                     response.errorWithCode(400, "Field note or id_category cannot null or empty", res)
                 } else {
+                    let sqlNew = 'SELECT data_note.id, data_note.title, data_note.note, data_note.time, ' +
+                        'category_note.name as name_category, category_note.id as id_category ' +
+                        'FROM data_note LEFT JOIN category_note ON data_note.id_category=category_note.id ' +
+                        'ORDER BY data_note.id DESC LIMIT 1';
 
-                    connection.query(`SELECT * FROM data_note ORDER BY id DESC LIMIT 1`,
+                    connection.query(sqlNew,
                         function (error, rows, field) {
                             if (error) {
                                 response.errorWithCode(400, "Field note or id_category cannot null or empty", res)
@@ -32,7 +36,7 @@ exports.insertNote = function (req, res) {
                                 let data = {
                                     error: false,
                                     data: rows,
-                                    message: 'New data has been created1',
+                                    message: 'New data has been created',
                                 }
                                 response.success(data, res)
                             }
