@@ -59,7 +59,23 @@ exports.updateNote = function (req, res) {
         function (error, result, field) {
             if (error || !result.affectedRows) response.errorWithCode(400, "Update Note didn't work", res);
             else {
-                (result.affectedRows == 0) ? response.errorWithCode(400, "Update Note didn't work", res) : response.success("Note has been update!", res);
+                if(result.affectedRows == 0){
+                    response.errorWithCode(400, "Update Note didn't work", res)
+                }else{
+                    connection.query(`SELECT * FROM data_note WHERE ID = ${id}`,
+                        function (error, rows, field) {
+                            if (error) {
+                                response.errorWithCode(400, "Update Note didn't work", res)
+                            } else {
+                                let data = {
+                                    error: false,
+                                    data: rows,
+                                    message: 'Note has been update!',
+                                }
+                                response.success(data, res)
+                            }
+                        })
+                }
             }
         }
     )
@@ -69,7 +85,7 @@ exports.deleteNote = function (req, res) {
     connection.query(`delete from data_note where id =?`, [req.params.id],
         function (error, result, fields) {
             if (error) throw error;
-            (result.affectedRows == 0) ? response.success("id not found!", res) : response.success("Note has been deleted!", res);
+            (result.affectedRows == 0) ?  response.errorWithCode(400, "Id Not Found", res) : response.success("Note has been deleted!", res);
         }
     )
 };
