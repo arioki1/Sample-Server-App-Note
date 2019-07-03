@@ -63,9 +63,9 @@ exports.updateNote = function (req, res) {
         function (error, result, field) {
             if (error || !result.affectedRows) response.errorWithCode(400, "Update Note didn't work", res);
             else {
-                if(result.affectedRows == 0){
+                if (result.affectedRows == 0) {
                     response.errorWithCode(400, "Update Note didn't work", res)
-                }else{
+                } else {
                     connection.query(`SELECT * FROM data_note WHERE ID = ${id}`,
                         function (error, rows, field) {
                             if (error) {
@@ -88,11 +88,24 @@ exports.deleteNote = function (req, res) {
 
     connection.query(`delete from data_note where id =?`, [req.params.id],
         function (error, result, fields) {
-            if (error) throw error;
-            (result.affectedRows == 0) ?  response.errorWithCode(400, "Id Not Found", res) : response.success("Note has been deleted!", res);
+            if (error) {
+                response.errorWithCode(400, "Id Not Found", res)
+            } else {
+                if (result.affectedRows == 0) {
+                    response.errorWithCode(400, "Id Not Found", res)
+                } else {
+                    let data = {
+                        error: false,
+                        id: req.params.id,
+                        message: "Note has been deleted!"
+                    }
+                    response.success(data, res);
+                }
+            }
         }
     )
 };
+
 exports.note = function (req, res) {
     modelNotes.getCountQuery(req, res, function (sql, maxCount) {
         connection.query(sql, function (error, rows, field) {
