@@ -85,7 +85,6 @@ exports.updateNote = function (req, res) {
     )
 };
 exports.deleteNote = function (req, res) {
-
     connection.query(`delete from data_note where id =?`, [req.params.id],
         function (error, result, fields) {
             if (error) {

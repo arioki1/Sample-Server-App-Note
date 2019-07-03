@@ -117,8 +117,20 @@ exports.updateCategory = function (req, res) {
 exports.deleteCategory = function (req, res) {
     connection.query(`delete from category_note where id =?`, [req.params.id],
         function (error, result, fields) {
-            if (error) throw error;
-            (result.affectedRows == 0) ? response.errorWithCode(400, "id not found!", res) : response.success("Category has been deleted!", res);
+            if(error){
+                response.errorWithCode(400, "id not found!", res)
+            }else{
+                if (result.affectedRows == 0) {
+                    let data = {
+                        error: false,
+                        id: req.params.id,
+                        message: 'Category has been deleted!',
+                    }
+                    response.success(data, res)
+                }else{
+                    response.errorWithCode(400, "id not found!", res)
+                }
+            }
         }
     )
 };
