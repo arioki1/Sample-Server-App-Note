@@ -5,6 +5,7 @@ exports.success = function (values, res) {
         status: 200,
         values: values,
     };
+	res.status(200);
     res.json(data);
     res.end();
 };
@@ -17,11 +18,13 @@ exports.error = function (res) {
         status: 500,
         values: "System Error",
     };
+	res.status(500);
     res.json(data);
     res.end();
 };
 exports.errorWithCode = function (code, value, res) {
-    const data = {
+    res.status(code);
+	const data = {
         status: code,
         values: value
     };
