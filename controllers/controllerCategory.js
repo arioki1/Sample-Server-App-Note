@@ -35,10 +35,10 @@ exports.category = function (req, res) {
             response.errorWithCode(400, "Note does not found", res);
         } else {
             console.log("mausk 3");
-            if(rows.length > 0){
+            if (rows.length > 0) {
                 console.log("mausk 4");
                 response.success(rows, res)
-            }else{
+            } else {
                 console.log("mausk 5");
                 response.errorWithCode(400, "Note does not found", res);
             }
@@ -94,7 +94,7 @@ exports.updateCategory = function (req, res) {
                     if (result.affectedRows == 0) {
                         response.errorWithCode(400, "Update Category didn't work", res)
                     } else {
-                        connection.query('SELECT * FROM category_note WHERE id =?',[id],
+                        connection.query('SELECT * FROM category_note WHERE id =?', [id],
                             function (error, rows, field) {
                                 if (error) {
                                     response.errorWithCode(400, "Update Category didn't work", res)
@@ -114,24 +114,24 @@ exports.updateCategory = function (req, res) {
         )
     }
 };
+
 exports.deleteCategory = function (req, res) {
     connection.query(`delete from category_note where id =?`, [req.params.id],
         function (error, result, fields) {
-            if(error){
-                response.errorWithCode(400, "id not found!", res)
-            }else{
+            if (error) {
+                response.errorWithCode(400, "Id Not Found", res)
+            } else {
                 if (result.affectedRows == 0) {
+                    response.errorWithCode(400, "Id Not Found", res)
+                } else {
                     let data = {
                         error: false,
                         id: req.params.id,
-                        message: 'Category has been deleted!',
+                        message: "Category has been deleted!"
                     }
-                    response.success(data, res)
-                }else{
-                    response.errorWithCode(400, "id not found!", res)
+                    response.success(data, res);
                 }
             }
         }
     )
 };
-
